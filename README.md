@@ -1,70 +1,92 @@
-# Getting Started with Create React App
+# React Web App with Docker and Kubernetes (Minikube)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project demonstrates how to:
 
-## Available Scripts
+- Create a React app using `create-react-app`
+- Containerize it using Docker
+- Push Docker images to Docker Hub
+- Deploy and update the app on a Kubernetes cluster using Minikube with Docker driver
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 📁 Project Structure
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+kubernetes-react-webapp/
+├── testapp/ # React app created via create-react-app
+├── Dockerfile # Used to build Docker images
+└── README.md
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🚀 Steps I Followed
 
-### `npm run build`
+### 1. Create React App
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+npx create-react-app testapp
+cd testapp
+```
+2. Start Minikube with Docker Driver
+```
+minikube start --driver=docker
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+🐳 Dockerfile (at root level)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+FROM node
 
-### `npm run eject`
+WORKDIR /myapp
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+COPY . .
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+RUN npm install
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+EXPOSE 3000
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+CMD ["npm", "start"]
+```
 
-## Learn More
+📦 Build and Push Docker Image (v1, v2, v3...)
+```
+# Build Docker image
+docker build -t akshaykashyap74/mykubernetestestapprepo:01 .
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# Login to Docker Hub (if needed)
+docker login
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Push to Docker Hub
+docker push akshaykashyap74/mykubernetestestapprepo:01
 
-### Code Splitting
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+☸️ Kubernetes Deployment (via Minikube)
+Create Deployment
+``` 
+kubectl create deployment my-webapp --image=akshaykashyap74/mykubernetestestapprepo:01
+```
 
-### Analyzing the Bundle Size
+Expose Deployment For Accessing App
+```
+kubectl expose deployment my-webapp --type=LoadBalancer --port=3000
+```
+Get URL to Access the App
+```
+minikube service my-webapp --url
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+🔄 Updating to a New Version
+After pushing a new image version (e.g., :02 or :03), update your running app with:
+```
+kubectl set image deployment/my-webapp my-webapp=akshaykashyap74/mykubernetestestapprepo:02
+```
 
-### Making a Progressive Web App
+✅ What I Learned
+  1. How to create and containerize a React app
+  2. How to use Docker and Docker Hub for image versioning
+  3. How to deploy and expose apps using Kubernetes
+  4. How to use Minikube with the Docker driver
+  5. How to update a running Kubernetes deployment with a new image version
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+📸 Checkout The Screenshots Folder
